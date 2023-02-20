@@ -1,6 +1,5 @@
 package com.dmp.jobsapi.services;
 
-import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +8,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.dmp.jobsapi.config.JwtProperties;
 import com.dmp.jobsapi.dto.LoginResult;
 import com.dmp.jobsapi.models.User;
 import com.dmp.jobsapi.repositories.UserRepository;
-
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.dmp.jobsapi.security.JwtPayload;
+import com.dmp.jobsapi.security.JwtProvider;
 
 @Service
 public class AuthService {
@@ -24,7 +21,7 @@ public class AuthService {
     UserRepository userRepository;
 
     @Autowired
-    JwtProperties jwtProperties;
+    JwtProvider jwtProvider;
 
     private BCryptPasswordEncoder bcrypt;
 
@@ -54,13 +51,8 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "invalid username or password.");
         }
 
-        String token = Jwts.builder()
-            .setSubject(user.getUsername())
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getExpire() * 1000))
-            .signWith(SignatureAlgorithm.HS512, jwtProperties.getSecret())
-            .compact();
+        LoginResult result = jwtProvider.generateToken(new JwtPayload(username));
         
-        return new LoginResult(token, jwtProperties.getExpire());
+        return result;
     }
 }
