@@ -14,6 +14,8 @@ import com.dmp.jobsapi.dto.PostRegister;
 import com.dmp.jobsapi.models.User;
 import com.dmp.jobsapi.services.AuthService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -22,13 +24,13 @@ public class AuthController {
     AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<User> postRegister(@RequestBody PostRegister request) {
+    public ResponseEntity<User> postRegister(@Valid @RequestBody PostRegister request) {
         User result = authService.register(request.toUser());
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResult> postLogin(@RequestBody PostLogin request) {
+    public ResponseEntity<LoginResult> postLogin(@Valid @RequestBody PostLogin request) {
         LoginResult result = authService.login(request.getUsername(), request.getPassword());
         return ResponseEntity.ok(result);
     }
